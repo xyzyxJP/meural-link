@@ -18,6 +18,7 @@ import (
 var token string
 
 func GetToken(username string, password string) (string, error) {
+	var authenticate model.Authenticate
 	log.Println("GetToken: " + username)
 
 	url := "https://api.meural.com/v0/authenticate"
@@ -44,7 +45,6 @@ func GetToken(username string, password string) (string, error) {
 		return "", err
 	}
 
-	var authenticate model.Authenticate
 	json.Unmarshal([]byte(string(body)), &authenticate)
 
 	token = authenticate.Token
@@ -113,21 +113,55 @@ func GetUserGalleries() (model.UserGalleries, error) {
 	return userGalleries, nil
 }
 
-func GetUserGalleryID(galleryName string) (int, error) {
-	log.Println("GetUserGalleryID: " + galleryName)
+func GetUserGalleryId(galleryName string) (int, error) {
+	log.Println("GetUserGalleryId: " + galleryName)
 
 	userGalleries, err := GetUserGalleries()
 	if err != nil {
-		return 0, err
+		return -1, err
 	}
 
 	for _, gallery := range userGalleries.Data {
-		if gallery.Name == galleryName {
+		if strings.Contains(gallery.Name, galleryName) {
 			return gallery.ID, nil
 		}
 	}
 
-	return 0, nil
+	return -1, nil
+}
+
+func PostGallery(name string, description string, orientation string) (model.Gallery, error) {
+	var gallery model.Gallery
+	log.Println("PostGallery: " + name)
+
+	url := "https://api.meural.com/v0/galleries"
+	method := "POST"
+
+	payload := strings.NewReader("name=" + name + "&description=" + description + "&orientation=" + orientation)
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, payload)
+
+	if err != nil {
+		return gallery, err
+	}
+	req.Header.Add("Authorization", "Token "+token)
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	res, err := client.Do(req)
+	if err != nil {
+		return gallery, err
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return gallery, err
+	}
+
+	json.Unmarshal([]byte(string(body)), &gallery)
+
+	return gallery, nil
 }
 
 func PostItem(filename string) (model.Item, error) {
@@ -215,4 +249,37 @@ func PutItem(id int, name string, author string, description string, medium stri
 	json.Unmarshal([]byte(string(body)), &item)
 
 	return item, nil
+}
+
+func PostItemToGallery(itemId int, galleryId int) (model.Gallery, error) {
+	var gallery model.Gallery
+	log.Println("PostItemToGallery: " + strconv.Itoa(itemId) + " -> " + strconv.Itoa(galleryId))
+
+	url := "https://api.meural.com/v0/galleries/" + strconv.Itoa(galleryId) + "/items/" + strconv.Itoa(itemId)
+	method := "POST"
+
+	payload := strings.NewReader("")
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, payload)
+
+	if err != nil {
+		return gallery, err
+	}
+	req.Header.Add("Authorization", "Token "+token)
+
+	res, err := client.Do(req)
+	if err != nil {
+		return gallery, err
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return gallery, err
+	}
+
+	json.Unmarshal([]byte(string(body)), &gallery)
+
+	return gallery, nil
 }

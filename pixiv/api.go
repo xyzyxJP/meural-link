@@ -2,16 +2,45 @@ package pixiv
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 
 	"xyzyxJP/meural-link/pixiv/model"
 )
+
+func GetUserDetails(userId string) (model.UserDetails, error) {
+	var userDetails model.UserDetails
+	log.Println("GetUserDetails: " + userId)
+
+	url := "https://www.pixiv.net/touch/ajax/user/details?id=" + userId + "&lang=ja"
+	method := "GET"
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, nil)
+
+	if err != nil {
+		return userDetails, err
+	}
+	req.Header.Add("user-agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1")
+
+	res, err := client.Do(req)
+	if err != nil {
+		return userDetails, err
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return userDetails, err
+	}
+
+	json.Unmarshal([]byte(string(body)), &userDetails)
+
+	return userDetails, nil
+}
 
 func GetUserProfile(userId string) (model.UserProfile, error) {
 	var userProfile model.UserProfile
@@ -104,10 +133,6 @@ func GetIllustPages(illustId string) (model.IllustPages, error) {
 	json.Unmarshal([]byte(string(body)), &illustPages)
 
 	return illustPages, nil
-}
-
-func GetIllustFilename(illustPages model.IllustPages, illust model.Illust, index int) string {
-	return illust.Body.UserName + " - " + illust.Body.Title + " (" + illust.Body.IllustID + ") p" + fmt.Sprint(index+1) + filepath.Ext(illustPages.Body[index].Urls.Original)
 }
 
 func GetIllustImage(url string, filename string) error {
