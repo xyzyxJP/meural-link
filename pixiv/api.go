@@ -12,7 +12,6 @@ import (
 )
 
 func GetUserDetails(userId string) (model.UserDetails, error) {
-	var userDetails model.UserDetails
 	log.Println("GetUserDetails: " + userId)
 
 	url := "https://www.pixiv.net/touch/ajax/user/details?id=" + userId + "&lang=ja"
@@ -22,28 +21,28 @@ func GetUserDetails(userId string) (model.UserDetails, error) {
 	req, err := http.NewRequest(method, url, nil)
 
 	if err != nil {
-		return userDetails, err
+		return model.UserDetails{}, err
 	}
 	req.Header.Add("user-agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1")
 
 	res, err := client.Do(req)
 	if err != nil {
-		return userDetails, err
+		return model.UserDetails{}, err
 	}
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return userDetails, err
+		return model.UserDetails{}, err
 	}
 
+	var userDetails model.UserDetails
 	json.Unmarshal([]byte(string(body)), &userDetails)
 
 	return userDetails, nil
 }
 
 func GetUserProfile(userId string) (model.UserProfile, error) {
-	var userProfile model.UserProfile
 	log.Println("GetUserProfile: " + userId)
 
 	url := "https://www.pixiv.net/ajax/user/" + userId + "/profile/all?lang=ja"
@@ -53,28 +52,28 @@ func GetUserProfile(userId string) (model.UserProfile, error) {
 	req, err := http.NewRequest(method, url, nil)
 
 	if err != nil {
-		return userProfile, err
+		return model.UserProfile{}, err
 	}
 	req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36")
 
 	res, err := client.Do(req)
 	if err != nil {
-		return userProfile, err
+		return model.UserProfile{}, err
 	}
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return userProfile, err
+		return model.UserProfile{}, err
 	}
 
+	var userProfile model.UserProfile
 	json.Unmarshal([]byte(string(body)), &userProfile)
 
 	return userProfile, nil
 }
 
 func GetIllust(illustId string) (model.Illust, error) {
-	var illust model.Illust
 	log.Println("GetIllust: " + illustId)
 
 	url := "https://www.pixiv.net/ajax/illust/" + illustId + "?lang=ja"
@@ -84,28 +83,28 @@ func GetIllust(illustId string) (model.Illust, error) {
 	req, err := http.NewRequest(method, url, nil)
 
 	if err != nil {
-		return illust, err
+		return model.Illust{}, err
 	}
 	req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36")
 
 	res, err := client.Do(req)
 	if err != nil {
-		return illust, err
+		return model.Illust{}, err
 	}
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return illust, err
+		return model.Illust{}, err
 	}
 
+	var illust model.Illust
 	json.Unmarshal([]byte(string(body)), &illust)
 
 	return illust, nil
 }
 
 func GetIllustPages(illustId string) (model.IllustPages, error) {
-	var illustPages model.IllustPages
 	log.Println("GetIllustPages: " + illustId)
 
 	url := "https://www.pixiv.net/ajax/illust/" + illustId + "/pages?lang=ja"
@@ -115,21 +114,22 @@ func GetIllustPages(illustId string) (model.IllustPages, error) {
 	req, err := http.NewRequest(method, url, nil)
 
 	if err != nil {
-		return illustPages, err
+		return model.IllustPages{}, err
 	}
 	req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36")
 
 	res, err := client.Do(req)
 	if err != nil {
-		return illustPages, err
+		return model.IllustPages{}, err
 	}
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return illustPages, err
+		return model.IllustPages{}, err
 	}
 
+	var illustPages model.IllustPages
 	json.Unmarshal([]byte(string(body)), &illustPages)
 
 	return illustPages, nil
@@ -169,12 +169,6 @@ func GetIllustImage(url string, filename string) error {
 	if err != nil {
 		return err
 	}
-
-	// exif := map[string]interface{}{}
-	// err = update.PrepareAndUpdateExif(file, os.Stdout, exif)
-	// if err != nil {
-	// 	return err
-	// }
 
 	return nil
 }

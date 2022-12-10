@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"xyzyxJP/meural-link/meural"
@@ -36,24 +37,45 @@ func PostRandomPixivToMeural() error {
 		return err
 	}
 
-	index := rand.Intn(len(userProfile.Body.Illusts))
-	illustId := keys(userProfile.Body.Illusts)[index]
-	illust, err := pixiv.GetIllust(illustId)
+	gallery, err := meural.GetUserGalleryId(userId)
 	if err != nil {
-		return err
-	}
-
-	galleryId, err := meural.GetUserGalleryId(userId)
-	if err != nil {
-		return err
-	}
-
-	if galleryId == -1 {
-		gallery, err := meural.PostGallery(userId+" - "+userName, userDetails.Body.UserDetails.UserComment, "horizontal")
+		gallery, err = meural.PostGallery(userId+" - "+userName, userDetails.Body.UserDetails.UserComment, "horizontal")
 		if err != nil {
 			return err
 		}
-		galleryId = gallery.Data.ID
+	}
+
+	galleryItems, err := meural.GetGalleryItems(gallery.Data.ID)
+	if err != nil {
+		return err
+	}
+
+	illustId := ""
+
+	for i := 0; i < len(userProfile.Body.Illusts); i++ {
+		illustId = keys(userProfile.Body.Illusts)[i]
+		log.Println("illustId: " + illustId)
+
+		flag := true
+		for _, item := range galleryItems.Data {
+			if strings.Contains(item.Name, illustId) {
+				flag = false
+				break
+			}
+		}
+
+		if flag {
+			break
+		}
+	}
+
+	if illustId == "" {
+		return fmt.Errorf("error: %s", "no new illusts")
+	}
+
+	illust, err := pixiv.GetIllust(illustId)
+	if err != nil {
+		return err
 	}
 
 	illustPages, err := pixiv.GetIllustPages(illustId)
@@ -77,13 +99,13 @@ func PostRandomPixivToMeural() error {
 			continue
 		}
 
-		item, err = meural.PutItem(item.Data.ID, illustTitle, userName, illust.Body.Description, "https://www.pixiv.net/artworks/"+illustId, illust.Body.CreateDate.Year())
+		item, err = meural.PutItem(item.Data.ID, illustTitle+" ("+illustId+")", userName, illust.Body.Description, "https://www.pixiv.net/artworks/"+illustId, illust.Body.CreateDate.Year())
 		if err != nil {
 			log.Fatal(err)
 			continue
 		}
 
-		_, err = meural.PostItemToGallery(item.Data.ID, galleryId)
+		_, err = meural.PostItemToGallery(item.Data.ID, gallery.Data.ID)
 		if err != nil {
 			log.Fatal(err)
 			continue
