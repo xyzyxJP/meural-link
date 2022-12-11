@@ -8,7 +8,7 @@ type UserProfile struct {
 	Body    struct {
 		Illusts     map[string]struct{} `json:"illusts"`
 		Manga       map[string]struct{} `json:"manga"`
-		Novels      []interface{}       `json:"novels"`
+		Novels      map[string]struct{} `json:"novels"`
 		MangaSeries []struct {
 			ID             string      `json:"id"`
 			UserID         string      `json:"userId"`
@@ -27,8 +27,53 @@ type UserProfile struct {
 			IsWatched      bool        `json:"isWatched"`
 			IsNotifying    bool        `json:"isNotifying"`
 		} `json:"mangaSeries"`
-		NovelSeries []interface{} `json:"novelSeries"`
-		Pickup      []struct {
+		NovelSeries []struct {
+			ID                            string    `json:"id"`
+			UserID                        string    `json:"userId"`
+			UserName                      string    `json:"userName"`
+			ProfileImageURL               string    `json:"profileImageUrl"`
+			XRestrict                     int       `json:"xRestrict"`
+			IsOriginal                    bool      `json:"isOriginal"`
+			IsConcluded                   bool      `json:"isConcluded"`
+			GenreID                       string    `json:"genreId"`
+			Title                         string    `json:"title"`
+			Caption                       string    `json:"caption"`
+			Language                      string    `json:"language"`
+			Tags                          []string  `json:"tags"`
+			PublishedContentCount         int       `json:"publishedContentCount"`
+			PublishedTotalCharacterCount  int       `json:"publishedTotalCharacterCount"`
+			PublishedTotalWordCount       int       `json:"publishedTotalWordCount"`
+			PublishedReadingTime          int       `json:"publishedReadingTime"`
+			UseWordCount                  bool      `json:"useWordCount"`
+			LastPublishedContentTimestamp int       `json:"lastPublishedContentTimestamp"`
+			CreatedTimestamp              int       `json:"createdTimestamp"`
+			UpdatedTimestamp              int       `json:"updatedTimestamp"`
+			CreateDate                    time.Time `json:"createDate"`
+			UpdateDate                    time.Time `json:"updateDate"`
+			FirstNovelID                  string    `json:"firstNovelId"`
+			LatestNovelID                 string    `json:"latestNovelId"`
+			DisplaySeriesContentCount     int       `json:"displaySeriesContentCount"`
+			ShareText                     string    `json:"shareText"`
+			Total                         int       `json:"total"`
+			FirstEpisode                  struct {
+				URL string `json:"url"`
+			} `json:"firstEpisode"`
+			WatchCount   interface{} `json:"watchCount"`
+			MaxXRestrict interface{} `json:"maxXRestrict"`
+			Cover        struct {
+				Urls struct {
+					Two40Mw     string `json:"240mw"`
+					Four80Mw    string `json:"480mw"`
+					One200X1200 string `json:"1200x1200"`
+					One28X128   string `json:"128x128"`
+					Original    string `json:"original"`
+				} `json:"urls"`
+			} `json:"cover"`
+			IsWatched   bool `json:"isWatched"`
+			IsNotifying bool `json:"isNotifying"`
+			AiType      int  `json:"aiType"`
+		} `json:"novelSeries"`
+		Pickup []struct {
 			Type            string      `json:"type"`
 			Deletable       bool        `json:"deletable"`
 			Draggable       bool        `json:"draggable"`
@@ -48,7 +93,7 @@ type UserProfile struct {
 			URL             string      `json:"url,omitempty"`
 			CoverImageSl    int         `json:"coverImageSl,omitempty"`
 			FirstIllustID   string      `json:"firstIllustId,omitempty"`
-			LatestIllustID  interface{} `json:"latestIllustId,omitempty"`
+			LatestIllustID  string      `json:"latestIllustId,omitempty"`
 			CreateDate      time.Time   `json:"createDate,omitempty"`
 			UpdateDate      time.Time   `json:"updateDate,omitempty"`
 			WatchCount      interface{} `json:"watchCount,omitempty"`
